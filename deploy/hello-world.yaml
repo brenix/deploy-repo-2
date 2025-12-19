@@ -1,0 +1,57 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  labels:
+    team: delivery
+  name: hello-world
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions:
+  - "missingkey=error"
+  generators:
+  - clusters:
+      selector:
+        matchExpressions:
+        - key: scope
+          operator: In
+          values:
+          - mgmt
+  template:
+    metadata:
+      name: hello-world-{{ .name }}
+    spec:
+      destination:
+        name: "{{ .name }}"
+        namespace: hello-world
+      project: default
+      source:
+        repoURL: oci://ghcr.io/bjw-s-labs/helm/app-template
+        targetRevision: 4.5.0
+        helm:
+          values: |
+            controllers:
+              main:
+                containers:
+                  main:
+                    image:
+                      repository: docker.io/nginx
+                      tag: latest
+                      pullPolicy: Always
+            service:
+              main:
+                controller: main
+                ports:
+                  http:
+                    port: 80
+      syncPolicy:
+        syncOptions:
+        - ApplyOutOfSyncOnly=true
+        - CreateNamespace=true
+        - Prune=true
+        - PruneLast=true
+        - PrunePropagationPolicy=foreground
+        - RespectIgnoreDifferences=true
+        - ServerSideApply=true
+        - Validate=true
