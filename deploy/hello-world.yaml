@@ -5,7 +5,7 @@ metadata:
   labels:
     team: delivery
   name: hello-world
-  namespace: argocd
+  namespace: deploy-repo-2
 spec:
   goTemplate: true
   goTemplateOptions:
@@ -55,3 +55,6 @@ spec:
         - RespectIgnoreDifferences=true
         - ServerSideApply=true
         - Validate=true
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
